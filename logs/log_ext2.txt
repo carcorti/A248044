@@ -1,0 +1,61 @@
+nohup: ignoring input
+=== sun_A248044_targeted_v3  --  Sun Conjecture 4.3(i)  [A248044] ===
+Targeted segmented search
+  targets file  : targets_65.txt
+  n range       : 6000000001 .. 10000000000
+  segment width : 1000000000  (~5.00 GB RAM: 4 GB pi_seg + 1 GB seg)
+  OpenMP threads: 16
+  Targets loaded : 65
+
+Building small primes up to 100000 ...
+  Small primes up to 100000: 9592 found
+Allocating segment arrays (5.00 GB) ...
+
+Using supplied pi_base=279545368 = pi(6000000000)
+
+[   9s] Segment [6000000001, 7000000001)  pi_base=279545368  remaining=65 ...  resolved: 14  (total: 14/65)
+[  51s] Segment [7000000001, 8000000001)  pi_base=323804352  remaining=51 ...  resolved: 4  (total: 18/65)
+[  87s] Segment [8000000001, 9000000001)  pi_base=367783654  remaining=47 ...  resolved: 12  (total: 30/65)
+[ 119s] Segment [9000000001, 10000000001)  pi_base=411523195  remaining=35 ...  resolved: 6  (total: 36/65)
+
+=== SUMMARY ===
+n range    : 6000000001 .. 10000000000
+Resolved   : 36 / 65
+Still open : 29
+Total time : 137 s
+
+=== STILL OPEN ===
+m          pi(m)   
+18490      2117    
+18491      2117    
+18492      2117    
+19620      2225    
+19623      2225    
+19624      2225    
+23211      2591    
+33574      3593    
+40963      4289    
+44857      4661    
+44858      4661    
+45151      4687    
+53584      5458    
+53585      5458    
+53586      5458    
+53587      5458    
+57919      5867    
+57920      5867    
+66335      6613    
+66336      6613    
+69997      6935    
+69998      6935    
+80390      7871    
+80391      7871    
+83115      8117    
+85504      8321    
+93381      9019    
+94927      9151    
+94928      9151    
+
+pi(10000000000) = 455052511
+Resume command:
+  ./sun_A248044_targeted_v3 targets_65.txt 10000000001 <new_end_n> --pi_base 455052511

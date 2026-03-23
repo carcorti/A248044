@@ -1,0 +1,39 @@
+=== sun_A248044_v5  --  Sun Conjecture 4.3(i)  [A248044] ===
+M_MAX=10000  BOUND=100000000  SIEVE_LIMIT=200000000
+Building sieve and pi table up to 200000000 ...
+  Bitset sieve: 12.5 MB
+  pi table: 800.0 MB
+  pi(200000000) = 11078937
+Done: 0.0 s
+
+Spot checks:
+  pi(10)=4 (expected 4)
+  pi(100)=25 (expected 25)
+  pi(1000)=168 (expected 168)
+  pi(10^6)=78498 (expected 78498)
+  pi(10^7)=664579 (expected 664579)
+  pi(10^8)=5761455 (expected 5761455)
+
+Sun example: pi(5)=3 pi(12)=5 sum=34 mod 17 = 0 [PASS]
+
+=== Searching: m = 1 .. 10000, effective n-bound = 100000000 ===
+
+=== SUMMARY ===
+m range:      1 .. 10000
+Search bound: n <= 100000000
+Found:        9991 / 10000 (99.9100%)
+Not found:    9
+Max a(m):     92069517  at m=1117  pi(m)=187
+Total time:   2 s
+
+=== NOT FOUND cases (heuristic obstruction analysis) ===
+m        pi(m)    blocked%    
+3121     445      60.9%
+3122     445      60.9%
+5449     721      55.3%
+5450     721      55.3%
+5451     721      55.3%
+6037     787      61.6%
+6960     893      59.1%
+7777     985      62.0%
+7823     989      59.6%

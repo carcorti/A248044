@@ -1,0 +1,127 @@
+nohup: ignoring input
+=== sun_A248044_targeted_v3  --  Sun Conjecture 4.3(i)  [A248044] ===
+Targeted segmented search
+  targets file  : targets_29.txt
+  n range       : 10000000001 .. 100000000000
+  segment width : 1000000000  (~5.00 GB RAM: 4 GB pi_seg + 1 GB seg)
+  OpenMP threads: 16
+  Targets loaded : 29
+
+Building small primes up to 316228 ...
+  Small primes up to 316228: 27293 found
+Allocating segment arrays (5.00 GB) ...
+
+Using supplied pi_base=455052511 = pi(10000000000)
+
+[   8s] Segment [10000000001, 11000000001)  pi_base=455052511  remaining=29 ...  resolved: 7  (total: 7/29)
+[  30s] Segment [11000000001, 12000000001)  pi_base=498388617  remaining=22 ...  resolved: 1  (total: 8/29)
+[  47s] Segment [12000000001, 13000000001)  pi_base=541555851  remaining=21 ...  resolved: 1  (total: 9/29)
+[  65s] Segment [13000000001, 14000000001)  pi_base=584570200  remaining=20 ...  resolved: 2  (total: 11/29)
+[  81s] Segment [14000000001, 15000000001)  pi_base=627440336  remaining=18 ...  resolved: 0  (total: 11/29)
+[  97s] Segment [15000000001, 16000000001)  pi_base=670180516  remaining=18 ...  resolved: 0  (total: 11/29)
+[ 113s] Segment [16000000001, 17000000001)  pi_base=712799821  remaining=18 ...  resolved: 2  (total: 13/29)
+[ 128s] Segment [17000000001, 18000000001)  pi_base=755305935  remaining=16 ...  resolved: 2  (total: 15/29)
+[ 143s] Segment [18000000001, 19000000001)  pi_base=797703398  remaining=14 ...  resolved: 0  (total: 15/29)
+[ 156s] Segment [19000000001, 20000000001)  pi_base=840000027  remaining=14 ...  resolved: 0  (total: 15/29)
+[ 170s] Segment [20000000001, 21000000001)  pi_base=882206716  remaining=14 ...  resolved: 0  (total: 15/29)
+[ 184s] Segment [21000000001, 22000000001)  pi_base=924324489  remaining=14 ...  resolved: 0  (total: 15/29)
+[ 198s] Segment [22000000001, 23000000001)  pi_base=966358351  remaining=14 ...  resolved: 0  (total: 15/29)
+[ 211s] Segment [23000000001, 24000000001)  pi_base=1008309544  remaining=14 ...  resolved: 0  (total: 15/29)
+[ 225s] Segment [24000000001, 25000000001)  pi_base=1050186367  remaining=14 ...  resolved: 0  (total: 15/29)
+[ 239s] Segment [25000000001, 26000000001)  pi_base=1091987405  remaining=14 ...  resolved: 0  (total: 15/29)
+[ 253s] Segment [26000000001, 27000000001)  pi_base=1133717820  remaining=14 ...  resolved: 0  (total: 15/29)
+[ 266s] Segment [27000000001, 28000000001)  pi_base=1175385155  remaining=14 ...  resolved: 0  (total: 15/29)
+[ 280s] Segment [28000000001, 29000000001)  pi_base=1216987937  remaining=14 ...  resolved: 0  (total: 15/29)
+[ 294s] Segment [29000000001, 30000000001)  pi_base=1258528162  remaining=14 ...  resolved: 2  (total: 17/29)
+[ 308s] Segment [30000000001, 31000000001)  pi_base=1300005926  remaining=12 ...  resolved: 0  (total: 17/29)
+[ 320s] Segment [31000000001, 32000000001)  pi_base=1341430624  remaining=12 ...  resolved: 0  (total: 17/29)
+[ 333s] Segment [32000000001, 33000000001)  pi_base=1382799415  remaining=12 ...  resolved: 2  (total: 19/29)
+[ 346s] Segment [33000000001, 34000000001)  pi_base=1424115489  remaining=10 ...  resolved: 0  (total: 19/29)
+[ 358s] Segment [34000000001, 35000000001)  pi_base=1465374659  remaining=10 ...  resolved: 0  (total: 19/29)
+[ 369s] Segment [35000000001, 36000000001)  pi_base=1506589876  remaining=10 ...  resolved: 0  (total: 19/29)
+[ 381s] Segment [36000000001, 37000000001)  pi_base=1547756812  remaining=10 ...  resolved: 0  (total: 19/29)
+[ 393s] Segment [37000000001, 38000000001)  pi_base=1588873108  remaining=10 ...  resolved: 0  (total: 19/29)
+[ 405s] Segment [38000000001, 39000000001)  pi_base=1629945987  remaining=10 ...  resolved: 0  (total: 19/29)
+[ 417s] Segment [39000000001, 40000000001)  pi_base=1670972264  remaining=10 ...  resolved: 0  (total: 19/29)
+[ 429s] Segment [40000000001, 41000000001)  pi_base=1711955433  remaining=10 ...  resolved: 0  (total: 19/29)
+[ 440s] Segment [41000000001, 42000000001)  pi_base=1752898084  remaining=10 ...  resolved: 0  (total: 19/29)
+[ 452s] Segment [42000000001, 43000000001)  pi_base=1793798703  remaining=10 ...  resolved: 0  (total: 19/29)
+[ 464s] Segment [43000000001, 44000000001)  pi_base=1834658067  remaining=10 ...  resolved: 0  (total: 19/29)
+[ 476s] Segment [44000000001, 45000000001)  pi_base=1875482847  remaining=10 ...  resolved: 0  (total: 19/29)
+[ 488s] Segment [45000000001, 46000000001)  pi_base=1916268743  remaining=10 ...  resolved: 0  (total: 19/29)
+[ 500s] Segment [46000000001, 47000000001)  pi_base=1957018338  remaining=10 ...  resolved: 0  (total: 19/29)
+[ 512s] Segment [47000000001, 48000000001)  pi_base=1997729452  remaining=10 ...  resolved: 0  (total: 19/29)
+[ 524s] Segment [48000000001, 49000000001)  pi_base=2038404475  remaining=10 ...  resolved: 0  (total: 19/29)
+[ 536s] Segment [49000000001, 50000000001)  pi_base=2079045540  remaining=10 ...  resolved: 0  (total: 19/29)
+[ 548s] Segment [50000000001, 51000000001)  pi_base=2119654578  remaining=10 ...  resolved: 0  (total: 19/29)
+[ 559s] Segment [51000000001, 52000000001)  pi_base=2160230408  remaining=10 ...  resolved: 0  (total: 19/29)
+[ 571s] Segment [52000000001, 53000000001)  pi_base=2200777436  remaining=10 ...  resolved: 0  (total: 19/29)
+[ 583s] Segment [53000000001, 54000000001)  pi_base=2241286680  remaining=10 ...  resolved: 0  (total: 19/29)
+[ 595s] Segment [54000000001, 55000000001)  pi_base=2281770277  remaining=10 ...  resolved: 0  (total: 19/29)
+[ 607s] Segment [55000000001, 56000000001)  pi_base=2322223112  remaining=10 ...  resolved: 0  (total: 19/29)
+[ 619s] Segment [56000000001, 57000000001)  pi_base=2362642765  remaining=10 ...  resolved: 0  (total: 19/29)
+[ 631s] Segment [57000000001, 58000000001)  pi_base=2403034927  remaining=10 ...  resolved: 0  (total: 19/29)
+[ 643s] Segment [58000000001, 59000000001)  pi_base=2443396396  remaining=10 ...  resolved: 0  (total: 19/29)
+[ 655s] Segment [59000000001, 60000000001)  pi_base=2483729191  remaining=10 ...  resolved: 0  (total: 19/29)
+[ 667s] Segment [60000000001, 61000000001)  pi_base=2524038155  remaining=10 ...  resolved: 0  (total: 19/29)
+[ 679s] Segment [61000000001, 62000000001)  pi_base=2564319542  remaining=10 ...  resolved: 0  (total: 19/29)
+[ 691s] Segment [62000000001, 63000000001)  pi_base=2604571471  remaining=10 ...  resolved: 0  (total: 19/29)
+[ 703s] Segment [63000000001, 64000000001)  pi_base=2644799757  remaining=10 ...  resolved: 0  (total: 19/29)
+[ 715s] Segment [64000000001, 65000000001)  pi_base=2685000601  remaining=10 ...  resolved: 0  (total: 19/29)
+[ 727s] Segment [65000000001, 66000000001)  pi_base=2725176643  remaining=10 ...  resolved: 0  (total: 19/29)
+[ 739s] Segment [66000000001, 67000000001)  pi_base=2765327756  remaining=10 ...  resolved: 0  (total: 19/29)
+[ 751s] Segment [67000000001, 68000000001)  pi_base=2805454432  remaining=10 ...  resolved: 0  (total: 19/29)
+[ 763s] Segment [68000000001, 69000000001)  pi_base=2845558213  remaining=10 ...  resolved: 0  (total: 19/29)
+[ 775s] Segment [69000000001, 70000000001)  pi_base=2885641353  remaining=10 ...  resolved: 0  (total: 19/29)
+[ 787s] Segment [70000000001, 71000000001)  pi_base=2925699539  remaining=10 ...  resolved: 0  (total: 19/29)
+[ 799s] Segment [71000000001, 72000000001)  pi_base=2965730599  remaining=10 ...  resolved: 0  (total: 19/29)
+[ 811s] Segment [72000000001, 73000000001)  pi_base=3005740846  remaining=10 ...  resolved: 0  (total: 19/29)
+[ 823s] Segment [73000000001, 74000000001)  pi_base=3045730736  remaining=10 ...  resolved: 0  (total: 19/29)
+[ 835s] Segment [74000000001, 75000000001)  pi_base=3085694966  remaining=10 ...  resolved: 0  (total: 19/29)
+[ 847s] Segment [75000000001, 76000000001)  pi_base=3125641477  remaining=10 ...  resolved: 0  (total: 19/29)
+[ 859s] Segment [76000000001, 77000000001)  pi_base=3165568071  remaining=10 ...  resolved: 0  (total: 19/29)
+[ 871s] Segment [77000000001, 78000000001)  pi_base=3205474366  remaining=10 ...  resolved: 0  (total: 19/29)
+[ 883s] Segment [78000000001, 79000000001)  pi_base=3245353518  remaining=10 ...  resolved: 0  (total: 19/29)
+[ 895s] Segment [79000000001, 80000000001)  pi_base=3285218896  remaining=10 ...  resolved: 1  (total: 20/29)
+[ 907s] Segment [80000000001, 81000000001)  pi_base=3325059246  remaining=9 ...  resolved: 0  (total: 20/29)
+[ 919s] Segment [81000000001, 82000000001)  pi_base=3364880246  remaining=9 ...  resolved: 0  (total: 20/29)
+[ 930s] Segment [82000000001, 83000000001)  pi_base=3404683449  remaining=9 ...  resolved: 0  (total: 20/29)
+[ 942s] Segment [83000000001, 84000000001)  pi_base=3444467709  remaining=9 ...  resolved: 0  (total: 20/29)
+[ 953s] Segment [84000000001, 85000000001)  pi_base=3484232867  remaining=9 ...  resolved: 0  (total: 20/29)
+[ 965s] Segment [85000000001, 86000000001)  pi_base=3523979003  remaining=9 ...  resolved: 0  (total: 20/29)
+[ 977s] Segment [86000000001, 87000000001)  pi_base=3563706203  remaining=9 ...  resolved: 0  (total: 20/29)
+[ 988s] Segment [87000000001, 88000000001)  pi_base=3603412533  remaining=9 ...  resolved: 0  (total: 20/29)
+[1000s] Segment [88000000001, 89000000001)  pi_base=3643101671  remaining=9 ...  resolved: 0  (total: 20/29)
+[1011s] Segment [89000000001, 90000000001)  pi_base=3682776125  remaining=9 ...  resolved: 0  (total: 20/29)
+[1023s] Segment [90000000001, 91000000001)  pi_base=3722428991  remaining=9 ...  resolved: 0  (total: 20/29)
+[1034s] Segment [91000000001, 92000000001)  pi_base=3762067054  remaining=9 ...  resolved: 0  (total: 20/29)
+[1046s] Segment [92000000001, 93000000001)  pi_base=3801688660  remaining=9 ...  resolved: 0  (total: 20/29)
+[1058s] Segment [93000000001, 94000000001)  pi_base=3841291749  remaining=9 ...  resolved: 0  (total: 20/29)
+[1069s] Segment [94000000001, 95000000001)  pi_base=3880881273  remaining=9 ...  resolved: 0  (total: 20/29)
+[1081s] Segment [95000000001, 96000000001)  pi_base=3920449831  remaining=9 ...  resolved: 0  (total: 20/29)
+[1093s] Segment [96000000001, 97000000001)  pi_base=3960003559  remaining=9 ...  resolved: 0  (total: 20/29)
+[1104s] Segment [97000000001, 98000000001)  pi_base=3999537962  remaining=9 ...  resolved: 0  (total: 20/29)
+[1116s] Segment [98000000001, 99000000001)  pi_base=4039061553  remaining=9 ...  resolved: 0  (total: 20/29)
+[1127s] Segment [99000000001, 100000000001)  pi_base=4078566781  remaining=9 ...  resolved: 0  (total: 20/29)
+
+=== SUMMARY ===
+n range    : 10000000001 .. 100000000000
+Resolved   : 20 / 29
+Still open : 9
+Total time : 1132 s
+
+=== STILL OPEN ===
+m          pi(m)   
+19620      2225    
+19623      2225    
+19624      2225    
+40963      4289    
+45151      4687    
+57919      5867    
+57920      5867    
+83115      8117    
+93381      9019    
+
+pi(100000000000) = 4118054813
+Resume command:
+  ./sun_A248044_targeted_v3 targets_29.txt 100000000001 <new_end_n> --pi_base 4118054813
