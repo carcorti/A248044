@@ -61,6 +61,8 @@ A248044/
 │   ├── log_ext3.txt              # Summary log of Ext-3
 │   ├── log_ext4.txt              # Summary log of Ext-4
 │   └── log_ext5.txt              # Summary log of Ext-5
+├── figures/
+│   └── a248044.png               # Logarithmic scatterplot of A248044(n), n = 1..100000
 └── verification/
     └── verify_A248044.py         # Python verification script
 ```
