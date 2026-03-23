@@ -1,0 +1,997 @@
+%-----------------------------------------------------------------------
+% A248044_rev6.tex
+%
+% Computational Verification of Sun's Conjecture 4.3(i)
+% and Exceptional Structure of Sequence A248044
+%
+% Working class: amsart (compiles with any standard TeX Live).
+% For final submission to MCOM, change ONLY the first line:
+%   \documentclass{amsart}  -->  \documentclass{mcom-l}
+% and copy mcom-l.cls into the project folder.
+%-----------------------------------------------------------------------
+
+\documentclass{amsart}
+
+%--- Pacchetti ----------------------------------------------------------
+\usepackage{amsmath,amssymb}
+\usepackage{hyperref}
+\usepackage{booktabs}
+\usepackage{url}
+
+%--- Configurazione hyperref --------------------------------------------
+\hypersetup{
+    colorlinks = true,
+    linkcolor  = black,
+    citecolor  = black,
+    urlcolor   = black
+}
+
+%--- Ambienti teorema ---------------------------------------------------
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{proposition}[theorem]{Proposition}
+
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{example}[theorem]{Example}
+\newtheorem{conjecture}[theorem]{Conjecture}
+\newtheorem{openproblem}[theorem]{Open Problem}
+
+\theoremstyle{remark}
+\newtheorem{remark}[theorem]{Remark}
+
+\numberwithin{equation}{section}
+
+%--- Macro --------------------------------------------------------------
+\newcommand{\Z}{\mathbb{Z}}
+\newcommand{\Zp}{\mathbb{Z}^{+}}
+\newcommand{\vq}[1]{v_{#1}}
+
+%=======================================================================
+\begin{document}
+%=======================================================================
+
+\title[Computational Verification of Sun's Conjecture~4.3(i)]
+{Computational Verification of Sun's Conjecture~4.3(i)\\
+and Exceptional Structure of Sequence~A248044}
+
+\author[C. Corti]{Carlo Corti}
+\address{Independent researcher, 21-040 Kalin\'owka, Poland}
+\email{carlo.corti@outlook.com}
+
+\thanks{%
+  \textit{AI Disclosure.}
+  The computational implementation, including the C~search programs
+  and segmented sieve, was developed with extensive assistance
+  from Anthropic's Claude language models
+  (\texttt{claude-sonnet-4-6} and \texttt{claude-opus-4-6}).
+  Claude also assisted substantially in the statistical analysis,
+  the code review process, and in the preparation of this manuscript.
+  All computations were executed and independently verified by the
+  author, who bears full scientific responsibility for all results,
+  including those portions where AI assistance was used.
+  The use of AI tools is disclosed in accordance with AMS publication
+  policy; see
+  \url{https://www.ams.org/publications/journals/policies/UseofArtificialIntelligence}.%
+}
+
+\subjclass[2020]{Primary 11A41, 11Y55; Secondary 11N05, 11A07}
+
+\keywords{prime counting function, sum of two squares,
+computational verification, OEIS A248044, Sun's conjecture,
+obstruction filter, exceptional cases}
+
+\date{}
+
+\begin{abstract}
+We present the first large-scale computational investigation of
+OEIS sequence A248044, which encodes Sun's Conjecture~4.3(i):
+for every positive integer $m$, there exists a positive integer~$n$
+such that $(m+n) \mid \pi(m)^2 + \pi(n)^2$, where $\pi(x)$ denotes
+the prime-counting function.
+We determine $a(m) = \min\{n \in \Zp : (m+n) \mid \pi(m)^2 + \pi(n)^2\}$
+for $99\,998$ of the first $100\,000$ positive integers, with a
+final search bound of $n \le 10^{13}$.
+The computation employs a segmented sieve of Eratosthenes coupled
+with a modular obstruction filter based on quadratic residuacity of~$-1$,
+parallelised via OpenMP on~$16$ threads.
+The two unresolved values, $m = 19\,623$ and $m = 19\,624$, satisfy
+$a(m) > 10^{13}$, yielding Cram\'er-type ratios
+$a(m)/m > 5.096 \times 10^8$ --- the largest lower bounds in the
+entire sequence.
+We prove that the obstruction filter is sound
+(Lemma~\ref{lem:obstruction}) and characterise the arithmetic
+structure of the unresolved cases: all belong to a cluster sharing
+$\pi(m) = 2225 = 5^2 \times 89$, whose prime factorisation consists
+entirely of primes congruent to $1 \pmod{4}$, maximising the
+modular obstruction.
+Statistical analysis reveals a heavy-tailed distribution
+consistent with a log-exponential model, and we provide
+probabilistic estimates for the unresolved values.
+\end{abstract}
+
+\maketitle
+
+%=======================================================================
+\section{Introduction}
+\label{sec:intro}
+%=======================================================================
+
+In a 2013 preprint subsequently published in 2019,
+Zhi-Wei Sun~\cite{Sun2019} proposed a collection of conjectures
+involving divisibility conditions on prime-related functions.
+Among these, Conjecture~4.3(i) (p.~15 of~\cite{Sun2019}) states:
+
+\begin{conjecture}[Sun, 2013/2019]\label{conj:sun43i}
+For every positive integer $m$, there exists a positive integer $n$
+such that
+\begin{equation}\label{eq:divisibility}
+(m + n) \mid \pi(m)^2 + \pi(n)^2,
+\end{equation}
+where $\pi(x) = \#\{p \le x : p \text{ prime}\}$ denotes the
+prime-counting function.
+\end{conjecture}
+
+The sequence $a(m)$, defined as the least positive integer~$n$
+satisfying~\eqref{eq:divisibility}, was submitted to the OEIS in
+2014 and appears as sequence A248044~\cite{OEIS_A248044}.
+The b-file at the time of writing contains values only for
+$m \le 200$.
+To the best of our knowledge, no large-scale computational
+verification of Conjecture~\ref{conj:sun43i} has appeared in the
+literature (for a related computational study of a different Sun
+conjecture, see~\cite{MacTsop2021}).
+
+The companion conjecture, 4.1(i), involving $p_m$ (the $m$-th prime)
+in place of $\pi(m)$, was investigated computationally
+in~\cite{CortiA247975}; the present paper extends the same
+methodology to the prime-counting variant.
+
+The present work makes three main contributions.
+
+\emph{First}, we extend the computation of $a(m)$ to
+$m = 1, \ldots, 100\,000$, resolving $99\,998$ of $100\,000$ cases
+with a final search bound of $n \le 10^{13}$.  This is the largest
+verified dataset for this conjecture.
+
+\emph{Second}, we carry out a systematic statistical analysis of the
+distribution of $a(m)$, revealing a heavy-tailed structure well
+described by a log-exponential model.
+
+\emph{Third}, we identify and characterise the two values of~$m$ for
+which the conjecture resists verification beyond $n = 10^{13}$,
+both belonging to an arithmetically structured cluster sharing a
+common value $\pi(m) = 2225 = 5^2 \times 89$; we explain how the
+factorisation of $\pi(m)$ into primes $\equiv 1 \pmod{4}$ produces
+maximal modular obstruction and propose the anomalous resistance of
+these two cases as an open problem.
+
+The paper is organised as follows.
+Section~\ref{sec:background} reformulates the divisibility condition
+in modular arithmetic and establishes the theoretical basis for the
+obstruction filter.
+Section~\ref{sec:algorithm} describes the algorithm and implementation.
+Section~\ref{sec:results} presents the computational results.
+Section~\ref{sec:statistics} carries out the statistical analysis.
+Section~\ref{sec:exceptional} analyses the two unresolved cases.
+Section~\ref{sec:conclusions} concludes with open problems.
+
+%=======================================================================
+\section{Mathematical Background}
+\label{sec:background}
+%=======================================================================
+
+For positive integers $m$ and $n$, set $s = m + n$.
+The divisibility condition~\eqref{eq:divisibility} is equivalent to
+\begin{equation}\label{eq:modular}
+\pi(n)^2 \equiv -\pi(m)^2 \pmod{s}.
+\end{equation}
+When $\gcd(\pi(m), s) = 1$, this simplifies to
+\begin{equation}\label{eq:qr}
+\bigl(\pi(n) \cdot \pi(m)^{-1}\bigr)^2 \equiv -1 \pmod{s},
+\end{equation}
+so a solution exists at index~$n$ only if $-1$ is a quadratic
+residue modulo~$s$ (a necessary but not sufficient condition, since
+$\pi(n)$ must also fall in the correct residue class).
+
+A classical result (see \cite{IrelandRosen}, Ch.~5) gives:
+
+\begin{proposition}\label{prop:qr}
+$-1$ is a quadratic residue modulo $s > 1$ if and only if both
+of the following hold:
+\begin{enumerate}
+\item[\textup{(a)}] $4 \nmid s$
+\textup{(}equivalently, $\vq{2}(s) \le 1$,
+where $\vq{2}(s)$ denotes the $2$-adic valuation of~$s$\textup{)};
+\item[\textup{(b)}] no prime $q \equiv 3 \pmod{4}$ divides~$s$.
+\end{enumerate}
+\end{proposition}
+
+\begin{remark}\label{rem:jacobi}
+Condition~(b) is strictly stronger than requiring the Jacobi
+symbol $\bigl(\frac{-1}{s}\bigr) = 1$.
+For odd~$s$, the Jacobi symbol equals~$1$ if and only if
+$\sum_{q \equiv 3\,(4)} \vq{q}(s)$ is even; actual solvability of
+$x^2 \equiv -1 \pmod{s}$ requires that no such prime divides~$s$
+at all.
+A standard example: $s = 21 = 3 \times 7$, where
+$\bigl(\frac{-1}{21}\bigr) = 1$ yet $-1$ is not a QR modulo~$21$.
+\end{remark}
+
+\subsection{The obstruction filter}
+
+We now formalise the obstruction that arises when a small prime
+$q \equiv 3 \pmod{4}$ divides $s = m + n$ to an odd power but
+does not divide~$\pi(m)$.
+
+\begin{lemma}[Obstruction Filter]\label{lem:obstruction}
+Let $q$ be a prime with $q \equiv 3 \pmod{4}$, and let
+$s = m + n$ with $m, n \in \Zp$.
+Suppose that $q \mid s$, that $\vq{q}(s)$ is odd, and that
+$q \nmid \pi(m)$.
+Then $s \nmid \pi(m)^2 + \pi(n)^2$.
+\end{lemma}
+
+\begin{proof}
+Suppose for contradiction that $s \mid \pi(m)^2 + \pi(n)^2$.
+Since $q \mid s$ and $\vq{q}(s)$ is odd, set $e = \vq{q}(s) \ge 1$ (odd).
+Then $q^e \mid \pi(m)^2 + \pi(n)^2$.
+
+Since $q \nmid \pi(m)$ by hypothesis, we have
+$\gcd(\pi(m), q^e) = 1$, so $\pi(m)$ is invertible modulo~$q^e$.
+From $q^e \mid \pi(m)^2 + \pi(n)^2$ we get
+\[
+\bigl(\pi(n) \cdot \pi(m)^{-1}\bigr)^2 \equiv -1 \pmod{q^e}.
+\]
+Reducing modulo~$q$:
+\[
+\bigl(\pi(n) \cdot \pi(m)^{-1}\bigr)^2 \equiv -1 \pmod{q}.
+\]
+Since $q \equiv 3 \pmod{4}$, the element $-1$ is not a quadratic
+residue modulo~$q$ (\cite{IrelandRosen}, Ch.~5, Theorem~3).
+This contradicts the equation above, so the assumption
+$s \mid \pi(m)^2 + \pi(n)^2$ must be false.
+\end{proof}
+
+\begin{corollary}\label{cor:maxobstruction}
+If every prime factor of $\pi(m)$ is congruent to $1 \pmod{4}$
+\textup{(}i.e., $\pi(m)$ has no prime factor $q \equiv 3 \pmod{4}$\textup{)},
+then for any small prime $q \equiv 3 \pmod{4}$ with $q \mid s$
+and $\vq{q}(s)$ odd, the condition of
+Lemma~\textup{\ref{lem:obstruction}} is satisfied and~$s$ is
+blocked.
+In this case the obstruction filter achieves its maximal
+elimination rate.
+\end{corollary}
+
+\begin{proof}
+If every prime factor of $\pi(m)$ is $\equiv 1 \pmod{4}$, then
+$q \nmid \pi(m)$ for every $q \equiv 3 \pmod{4}$, and
+Lemma~\ref{lem:obstruction} applies whenever $q \mid s$ with
+$\vq{q}(s)$ odd.
+\end{proof}
+
+\begin{remark}\label{rem:filter_general}
+The proof of Lemma~\ref{lem:obstruction} is valid for any prime
+$q \equiv 3 \pmod{4}$, not only for the small primes used in our
+implementation.  Our code tests $q \in \{3, 7, 11, 19\}$ for
+computational efficiency; using all primes $q \equiv 3 \pmod{4}$
+up to~$s$ would make the filter exact for condition~(b) of
+Proposition~\ref{prop:qr} but at prohibitive computational cost.
+\end{remark}
+
+\subsection{Density of obstructed candidates}
+
+The fraction of integers $s \le x$ that are divisible by at
+least one prime $q \equiv 3 \pmod{4}$ to an odd power can be
+estimated using the Landau--Ramanujan theorem~\cite{Landau1908}
+and Mertens-type products~\cite{Mertens1874,Tenenbaum1995}.
+The set of integers with no prime factor $q \equiv 3 \pmod{4}$
+to odd power has natural density zero, with asymptotic count
+$\sim K x / \sqrt{\ln x}$ for a constant $K \approx 0.7642$.
+At the finite scales relevant to our computation ($x \sim 10^{9}$
+to $10^{13}$), the fraction of candidate values of~$s$ that
+\emph{pass} the full condition~(b) is roughly $17$--$20\%$;
+the complementary $80$--$83\%$ are obstructed in principle.
+
+Our implementation checks only $q \in \{3, 7, 11, 19\}$,
+which empirically eliminates approximately $57\%$ of candidates
+(measured across the monolithic run for $m = 1, \ldots, 100\,000$),
+well below the theoretical maximum.  The gap is due to the
+limited trial-division bound: candidates whose only factor
+$q \equiv 3 \pmod{4}$ exceeds~$19$ are not eliminated.
+
+%=======================================================================
+\section{Algorithm and Implementation}
+\label{sec:algorithm}
+%=======================================================================
+
+\subsection{Overview}
+
+The computation proceeded in two phases:
+a \emph{monolithic} phase computing $a(m)$ for all
+$m = 1, \ldots, 100\,000$ with search bound $n \le 6 \times 10^9$,
+followed by a series of \emph{targeted segmented} searches
+extending the bound to $n = 10^{13}$ for the unresolved cases.
+
+All computations were performed on a personal workstation:
+AMD Ryzen~9 7940HS (16 threads), 64\,GB DDR5 RAM,
+running Linux Mint~22.3.  Compilation used GCC with
+\texttt{-O3 -march=znver4 -fopenmp}.
+
+\subsection{Monolithic search: \texttt{sun\_A248044\_v5.c}}
+
+For the initial phase, the program builds a global table of
+$\pi(n)$ for all $n \le N_{\max}$, stored as \texttt{uint32\_t}.
+The sieve of Eratosthenes marks composites in a
+\texttt{uint8\_t} array; a prefix sum then fills the $\pi$-table.
+Memory consumption is $5 \cdot N_{\max}$ bytes
+($\approx 30$\,GB for $N_{\max} = 6 \times 10^9$).
+
+For each $m$ and each candidate $n$, the program sets
+$s = m + n$ and checks:
+\begin{enumerate}
+\item \textbf{Obstruction filter:}
+  for each $q \in \{3, 7, 11, 19\}$, if $q \mid s$, $\vq{q}(s)$
+  is odd, and $q \nmid \pi(m)$, reject~$n$.
+  Also reject if $4 \mid s$ (condition~(a) of
+  Proposition~\ref{prop:qr}).
+\item \textbf{Divisibility test:}
+  compute $\pi(m)^2 + \pi(n)^2$ and check whether $s$ divides the
+  sum.
+\end{enumerate}
+
+For $n \le 6 \times 10^9$, we have $\pi(n) \le \pi(6 \times 10^9)
+\approx 2.80 \times 10^8$ and $\pi(m) \le \pi(100\,000)
+= 9\,592$, so $\pi(m)^2 + \pi(n)^2 < 7.8 \times 10^{16}$, which
+fits in \texttt{int64\_t} (max $\approx 9.2 \times 10^{18}$).
+
+The monolithic phase resolved $99\,935$ of $100\,000$ cases in
+approximately $10$~minutes of wall-clock time, leaving $65$
+unresolved cases (the ``exceptional'' values of~$m$).
+
+\subsection{Targeted segmented search: \texttt{sun\_A248044\_targeted\_v3.c}}
+\label{sec:targeted}
+
+The monolithic architecture cannot scale beyond
+$\sim 7 \times 10^9$ due to the RAM ceiling of the global
+$\pi$-table.
+For the extended searches we developed a segmented approach:
+the range $[n_{\min}, n_{\max})$ is divided into segments of width
+$W = 10^9$, and for each segment $[l, l+W)$:
+
+\begin{enumerate}
+\item A segmented sieve of Eratosthenes marks composites in
+  a \texttt{uint8\_t} array \texttt{seg[]} of size~$W$
+  ($\approx 1$\,GB).
+\item A prefix sum computes $\pi_{\mathrm{seg}}[k]
+  = \#\{\text{primes in } [l, l+k]\}$ as \texttt{uint32\_t}
+  ($\approx 4$\,GB), and the absolute count is recovered as
+  $\pi(l+k) = \pi_{\mathrm{base}} + \pi_{\mathrm{seg}}[k]$,
+  where $\pi_{\mathrm{base}} = \pi(l)$ is maintained across
+  segments.
+\item The inner loop iterates over all $k \in [0, W)$ in parallel
+  (OpenMP, \texttt{schedule(guided)}), and for each still-unresolved
+  target~$m$, applies the obstruction filter and divisibility test.
+\end{enumerate}
+
+Total memory per segment: $\approx 5$\,GB.  Since $\pi_{\mathrm{seg}}[k]$
+counts primes within a single segment of width $10^9$, the offset
+cannot exceed $\sim 4 \times 10^7$ and comfortably fits in
+\texttt{uint32\_t}.
+
+For $n > \sim 3.5 \times 10^9$ we have $\pi(n) > 1.6 \times 10^8$,
+so $\pi(n)^2 > 2.6 \times 10^{16}$; and at the extremes of Ext-5
+($n \sim 10^{13}$) we have $\pi(n) \approx 3.5 \times 10^{11}$, giving
+$\pi(n)^2 \approx 1.2 \times 10^{23}$, which far exceeds the range
+of \texttt{int64\_t}.  Accordingly, the segmented tool uses
+\texttt{\_\_int128} (a GCC extension) uniformly for the sum
+$\pi(m)^2 + \pi(n)^2$ and the modular reduction.
+On x86-64, GCC compiles $\mathtt{\_\_int128} \mathbin{\%}
+\mathtt{int64\_t}$ to a native \texttt{DIV} instruction
+(\texttt{rdx:rax}), so the overhead relative to 64-bit arithmetic
+is negligible (a few cycles per division).
+
+\subsection{Parallelism and correctness}
+
+The inner loop is parallelised with
+\texttt{\#pragma omp parallel for schedule(guided)}.
+The choice of \texttt{guided} scheduling reflects the non-uniform
+cost per iteration: the obstruction filter rejects $\sim 57\%$ of
+candidates without performing the expensive 128-bit division,
+creating significant load imbalance under static scheduling.
+
+Target data (arrays of $m$, $\pi(m)^2$, and filter bitmasks)
+are copied into Structure-of-Arrays (SoA) layout before the
+parallel region.  With at most $65$ targets at $\le 24$ bytes each,
+the working set of $\approx 1.5$\,kB fits entirely in the L1 cache
+(32\,kB per core), ensuring that the hot loop is memory-bound on
+the segment arrays rather than on target metadata.
+
+The variable \texttt{found\_n[ai]} (recording the best solution
+found so far for target~$ai$) is read without synchronisation
+inside the parallel loop and written only under
+\texttt{\#pragma omp critical}.  This constitutes a formal data
+race under the C11/OpenMP memory model; however, on x86-64 under
+the Total Store Order (TSO) memory model, an aligned 64-bit read
+cannot produce a torn value.  The worst case is a stale read, which
+may cause one redundant iteration but never affects correctness:
+the critical section always compares and retains the global minimum.
+An \texttt{omp atomic read} directive would eliminate the formal
+race but at a cost of $\sim 4$ cycles $\times 6.5 \times 10^{10}$
+iterations $\approx 87$~seconds per segment --- unacceptable given
+that the benign race preserves correctness on the target
+architecture.
+
+\subsection{Code review}
+
+The targeted search code (v3) underwent two rounds of independent
+review with assistance from AI language models (see the AI~Disclosure
+footnote on p.~1).
+The first round identified two critical bugs
+(integer overflow in $\pi(n)^2$ and a race condition on the
+minimum-tracking logic); both were fixed in v2.
+The second round confirmed correctness and led to
+minor improvements (input parsing hardening, overflow fix in the
+CSV output column).
+All observations and their dispositions are documented in the source
+code header.
+
+%=======================================================================
+\section{Computational Results}
+\label{sec:results}
+%=======================================================================
+
+\subsection{Campaign summary}
+
+Table~\ref{tab:campaigns} summarises the progressive resolution of
+the $65$ initially unresolved cases across the monolithic and
+extended campaigns.
+
+\begin{table}[ht]
+\centering
+\caption{Campaign summary.  The monolithic run (M1) used
+\texttt{sun\_A248044\_v5.c}; all Ext runs used
+\texttt{sun\_A248044\_targeted\_v3.c}.
+``+Resolved'' denotes newly resolved cases in each run.}
+\label{tab:campaigns}
+\small
+\begin{tabular}{llrrrl}
+\toprule
+Run & Bound $n$ & +Resolved & Still open & Time & Note \\
+\midrule
+M1 (monolithic) & $\le 6 \times 10^9$
+  & $99\,935$ & 65 & $\sim$10\,min & All $m \le 10^5$ \\
+Ext-2 & $6 \times 10^9 \to 10^{10}$
+  & 36 & 29 & 137\,s & \\
+Ext-3 & $10^{10} \to 10^{11}$
+  & 20 & 9 & 1\,132\,s & \\
+Ext-4 & $10^{11} \to 10^{12}$
+  & 4 & 5 & 9\,452\,s & \\
+Ext-5 & $10^{12} \to 10^{13}$
+  & 3 & \textbf{2} & 86\,098\,s & \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The total computation time for the extended campaigns was
+approximately $96\,819$ seconds ($\approx 26.9$ hours).
+Including the monolithic phase ($\approx 0.17$~hours), the entire
+computation required approximately $27$~hours of wall-clock time
+($\approx 432$ CPU-hours on $16$ threads).
+An Ext-6 campaign ($10^{13} \to 10^{14}$) would require an
+estimated $\sim 240$ hours of wall-clock time on the same hardware
+and was deemed infeasible.
+
+\subsection{Largest values of $a(m)$}
+
+Table~\ref{tab:top10_absolute} lists the ten largest absolute
+values of $a(m)$ found in the computation.
+
+\begin{table}[ht]
+\centering
+\caption{Top~10 values of $a(m)$ by absolute magnitude.}
+\label{tab:top10_absolute}
+\small
+\begin{tabular}{rrrrl}
+\toprule
+$m$ & $\pi(m)$ & $a(m)$ & Ratio $a(m)/m$ & Campaign \\
+\midrule
+$83\,115$ & $8\,117$ & $4\,629\,736\,117\,663$ & $5.57 \times 10^7$ & Ext-5 \\
+$40\,963$ & $4\,289$ & $2\,650\,225\,478\,854$ & $6.47 \times 10^7$ & Ext-5 \\
+$19\,620$ & $2\,225$ & $1\,150\,315\,774\,321$ & $5.86 \times 10^7$ & Ext-5 \\
+$57\,919$ & $5\,867$ & $330\,283\,186\,011$ & $5.70 \times 10^6$ & Ext-4 \\
+$57\,920$ & $5\,867$ & $330\,283\,186\,010$ & $5.70 \times 10^6$ & Ext-4 \\
+$45\,151$ & $4\,687$ & $229\,736\,032\,374$ & $5.09 \times 10^6$ & Ext-4 \\
+$93\,381$ & $9\,019$ & $190\,261\,921\,669$ & $2.04 \times 10^6$ & Ext-4 \\
+$85\,504$ & $8\,321$ & $79\,705\,931\,373$ & $9.32 \times 10^5$ & Ext-3 \\
+$44\,857$ & $4\,661$ & $32\,348\,326\,705$ & $7.21 \times 10^5$ & Ext-3 \\
+$44\,858$ & $4\,661$ & $32\,348\,326\,704$ & $7.21 \times 10^5$ & Ext-3 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Largest Cram\'er-type ratios}
+
+Table~\ref{tab:top10_ratio} lists the ten largest
+Cram\'er-type ratios $C(m) = a(m)/m$.
+
+\begin{table}[ht]
+\centering
+\caption{Top~10 values by Cram\'er-type ratio $a(m)/m$.}
+\label{tab:top10_ratio}
+\small
+\begin{tabular}{rrrrr}
+\toprule
+$m$ & $\pi(m)$ & $a(m)$ & $a(m)/m$ & Campaign \\
+\midrule
+$40\,963$ & $4\,289$ & $2\,650\,225\,478\,854$ & $6.47 \times 10^7$ & Ext-5 \\
+$19\,620$ & $2\,225$ & $1\,150\,315\,774\,321$ & $5.86 \times 10^7$ & Ext-5 \\
+$83\,115$ & $8\,117$ & $4\,629\,736\,117\,663$ & $5.57 \times 10^7$ & Ext-5 \\
+$57\,919$ & $5\,867$ & $330\,283\,186\,011$ & $5.70 \times 10^6$ & Ext-4 \\
+$57\,920$ & $5\,867$ & $330\,283\,186\,010$ & $5.70 \times 10^6$ & Ext-4 \\
+$45\,151$ & $4\,687$ & $229\,736\,032\,374$ & $5.09 \times 10^6$ & Ext-4 \\
+$93\,381$ & $9\,019$ & $190\,261\,921\,669$ & $2.04 \times 10^6$ & Ext-4 \\
+$85\,504$ & $8\,321$ & $79\,705\,931\,373$ & $9.32 \times 10^5$ & Ext-3 \\
+$44\,857$ & $4\,661$ & $32\,348\,326\,705$ & $7.21 \times 10^5$ & Ext-3 \\
+$44\,858$ & $4\,661$ & $32\,348\,326\,704$ & $7.21 \times 10^5$ & Ext-3 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Distribution by order of magnitude}
+
+Table~\ref{tab:distribution} shows the distribution of $a(m)$
+across orders of magnitude, among the $99\,998$ resolved cases.
+
+\begin{table}[ht]
+\centering
+\caption{Distribution of $a(m)$ by order of magnitude
+($99\,998$ resolved cases plus $2$ unresolved).}
+\label{tab:distribution}
+\begin{tabular}{lrr}
+\toprule
+Range & Count & Cumulative \\
+\midrule
+$a(m) \le 10^6$     & $89\,685$ & $89\,685$ \\
+$10^6 < a(m) \le 10^7$   & $7\,516$ & $97\,201$ \\
+$10^7 < a(m) \le 10^8$   & $2\,009$ & $99\,210$ \\
+$10^8 < a(m) \le 10^9$   & $576$ & $99\,786$ \\
+$10^9 < a(m) \le 10^{10}$  & $185$ & $99\,971$ \\
+$10^{10} < a(m) \le 10^{11}$ & $20$ & $99\,991$ \\
+$10^{11} < a(m) \le 10^{12}$ & $4$ & $99\,995$ \\
+$10^{12} < a(m) \le 10^{13}$ & $3$ & $99\,998$ \\
+$a(m) > 10^{13}$ (unresolved) & $2$ & $100\,000$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The monotonically decreasing counts across orders of magnitude
+confirm the heavy-tailed nature of the distribution.
+The median value is $a(m) = 52\,846$.
+
+\subsection{Independent verification}
+
+All $63$ results from the extended campaigns (Ext-2 through Ext-5)
+were independently verified by checking the divisibility condition
+\begin{equation}\label{eq:verify}
+(\pi(m)^2 + \pi(a(m))^2) \bmod (m + a(m)) = 0
+\end{equation}
+using the values $\pi(m)$ and $\pi(a(m))$ reported in the CSV
+output files.  These values can be verified against the known
+checkpoints $\pi(10^k)$ from OEIS A006880~\cite{OEIS_A006880};
+Table~\ref{tab:pi_checkpoints} lists those used.
+
+\begin{table}[ht]
+\centering
+\caption{Checkpoints for $\pi(n)$ used in independent verification
+(OEIS A006880, confirmed with SymPy~\cite{SymPy}).}
+\label{tab:pi_checkpoints}
+\begin{tabular}{rr}
+\toprule
+$n$ & $\pi(n)$ \\
+\midrule
+$10^{8}$ & $5\,761\,455$ \\
+$10^{9}$ & $50\,847\,534$ \\
+$6 \times 10^{9}$ & $279\,545\,368$ \\
+$10^{10}$ & $455\,052\,511$ \\
+$10^{11}$ & $4\,118\,054\,813$ \\
+$10^{12}$ & $37\,607\,912\,018$ \\
+$10^{13}$ & $346\,065\,536\,839$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Consecutive-$m$ pairs}
+
+A striking feature of the dataset is the prevalence of consecutive
+pairs $(m, m+1)$ sharing large values of $a$.  The top-10 tables
+include the pairs $(57\,919, 57\,920)$ and $(44\,857, 44\,858)$,
+each with $a(m+1) = a(m) - 1$.  This is no coincidence: provided
+$a(m) > 1$, if both $\pi(m+1) = \pi(m)$ (i.e., $m+1$ is composite)
+and $\pi(a(m)-1) = \pi(a(m))$ (i.e., $a(m)$ is composite), then
+$s' = (m+1) + (a(m)-1) = m + a(m) = s$, and the divisibility
+$s \mid \pi(m)^2 + \pi(a(m))^2$ immediately yields
+$s' \mid \pi(m+1)^2 + \pi(a(m)-1)^2$, so
+$a(m+1) \le a(m) - 1$.
+(When $a(m) = 1$, as happens for $m = 3, 7, \ldots$, the candidate
+$a(m) - 1 = 0$ is not a positive integer and the mechanism does
+not apply.)
+This ``shadowing'' mechanism is not guaranteed (either $m+1$ or
+$a(m)$ could be prime), but when it holds, it produces
+exact pairs with $a(m+1) = a(m) - 1$.
+
+%=======================================================================
+\section{Statistical Analysis}
+\label{sec:statistics}
+%=======================================================================
+
+\subsection{Heavy-tailed distribution}
+
+The distribution of $a(m)$ is strongly heavy-tailed: while the
+median is approximately $52\,846$, the maximum resolved value is
+$\approx 4.63 \times 10^{12}$, a ratio of $\sim 8.8 \times 10^7$.
+Values of $a(m)$ exceeding $10^9$ occur for $63$ values of~$m$
+out of $99\,998$ resolved ($0.063\%$), while values exceeding
+$10^{12}$ occur for $3$ values ($0.003\%$).
+
+\subsection{A log-exponential model}
+
+We model the occurrence of solutions heuristically.
+For a given~$m$, each candidate $s = m + n$ (not blocked by the
+obstruction filter) independently has a ``pass probability'' that
+depends on the number of valid residue classes for $\pi(n)$
+modulo~$s$.  Under a Cram\'er-type heuristic, the number of
+solutions in an interval $[N_1, N_2]$ is approximately proportional
+to $\ln(N_2/N_1)$, giving a log-exponential distribution:
+\begin{equation}\label{eq:logexp}
+\Pr\bigl(a(m) < N \mid a(m) > N_0\bigr)
+= 1 - \exp\bigl(-\lambda \cdot \ln(N/N_0)\bigr)
+= 1 - (N_0/N)^{\lambda},
+\end{equation}
+where $\lambda > 0$ is a pass-rate parameter.
+
+\subsection{Calibration from extended campaigns}
+
+The pass-rate parameter~$\lambda$ can be estimated from the
+extended campaigns by the relation
+\[
+\lambda \approx
+\frac{\text{(number resolved)}}
+     {\text{(number of targets)} \times \ln(N_{\max}/N_{\min})}.
+\]
+Table~\ref{tab:passrate} summarises the estimates.
+
+\begin{table}[ht]
+\centering
+\caption{Empirical pass rates by campaign.  The declining
+trend reflects the selection effect: cases surviving to higher
+bounds have intrinsically lower pass rates.}
+\label{tab:passrate}
+\begin{tabular}{lrrl}
+\toprule
+Campaign & Resolved/Targets & $\ln(N_{\max}/N_{\min})$ &
+  $\hat\lambda$ \\
+\midrule
+Ext-2 & $36/65$  & $0.511$ & $1.08$ \\
+Ext-3 & $20/29$  & $2.303$ & $0.30$ \\
+Ext-4 & $4/9$    & $2.303$ & $0.19$ \\
+Ext-5 & $3/5$    & $2.303$ & $0.26$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The declining pass rate from Ext-2 to the later campaigns
+reflects a strong selection effect: the cases surviving to higher
+bounds are precisely those with the highest intrinsic obstruction,
+so the average pass rate among survivors decreases with the bound.
+
+Using the Ext-5 estimate $\hat\lambda \approx 0.26$ for the
+two unresolved cases, the conditional median (given $a(m) > 10^{13}$)
+is
+\[
+\tilde{N} = 10^{13} \cdot \exp(\ln 2 / 0.26)
+\approx 10^{13} \times 14.4
+\approx 1.4 \times 10^{14}.
+\]
+
+\subsection{Probabilistic estimates for unresolved cases}
+
+Under the log-exponential model with $\lambda = 0.26$,
+the \emph{heuristic} probability of resolving each unresolved case
+within various bounds is:
+\begin{align*}
+\Pr\bigl(a(m) \le 10^{14} \mid a(m) > 10^{13}\bigr)
+  &\approx 1 - 10^{-0.26} \approx 0.45, \\
+\Pr\bigl(a(m) \le 10^{15} \mid a(m) > 10^{13}\bigr)
+  &\approx 1 - 10^{-0.52} \approx 0.70, \\
+\Pr\bigl(a(m) \le 10^{16} \mid a(m) > 10^{13}\bigr)
+  &\approx 1 - 10^{-0.78} \approx 0.83.
+\end{align*}
+
+The heuristic probability of finding \emph{both} cases within
+$[10^{13}, 10^{14}]$ is approximately $0.45^2 \approx 0.20$,
+and within $[10^{13}, 10^{15}]$ approximately
+$0.70^2 \approx 0.49$.
+
+\begin{remark}
+The log-exponential model treats $a(m)$ as though each logarithmic
+unit of search space is equally likely to yield a solution.  This is
+a heuristic, not a theorem; the data are deterministic, not i.i.d.,
+and the model does not account for the specific arithmetic structure
+of individual cases.  The estimates above should be understood as
+order-of-magnitude guidance, not precise probabilities.
+\end{remark}
+
+%=======================================================================
+\section{Exceptionally Resistant Cases}
+\label{sec:exceptional}
+%=======================================================================
+
+\subsection{The two unresolved values}
+
+After the full campaign (bound $n = 10^{13}$), the two values
+\begin{equation}\label{eq:open}
+m = 19\,623 \quad\text{and}\quad m = 19\,624
+\end{equation}
+remain unresolved, with
+\[
+a(19\,623) > 10^{13}, \qquad a(19\,624) > 10^{13},
+\]
+giving Cram\'er-type lower bounds
+$a(m)/m > 5.096 \times 10^8$ --- the largest in the entire dataset.
+
+\subsection{The cluster $\{19\,620, 19\,623, 19\,624\}$}
+
+The three values $m \in \{19\,620, 19\,623, 19\,624\}$ all satisfy
+$\pi(m) = 2225 = 5^2 \times 89$.  The value $m = 19\,620$ was
+resolved in Ext-5 at $a(19\,620) = 1\,150\,315\,774\,321$
+(ratio $\approx 5.86 \times 10^7$), but $m = 19\,623$ and
+$m = 19\,624$ resist beyond $10^{13}$ --- a factor of at least
+$8.7$ further.
+
+The factorisation $2225 = 5^2 \times 89$ consists entirely of
+primes congruent to $1 \pmod{4}$ ($5 \equiv 1 \pmod{4}$ and
+$89 \equiv 1 \pmod{4}$).  By Corollary~\ref{cor:maxobstruction},
+the obstruction filter achieves its maximal elimination rate for
+all three values, since no filter prime $q \in \{3, 7, 11, 19\}$
+(all $\equiv 3 \pmod{4}$) divides $\pi(m) = 2225$.
+
+This maximal obstruction explains why all three values are
+exceptional, but it does not explain why $m = 19\,623$ and
+$m = 19\,624$ resist so much more than $m = 19\,620$.
+
+\subsection{Congruence analysis}
+
+Table~\ref{tab:congruences} compares the residues of the three
+cluster members modulo small numbers.
+
+\begin{table}[ht]
+\centering
+\caption{Residues of the cluster $\{19\,620, 19\,623, 19\,624\}$
+modulo small values.}
+\label{tab:congruences}
+\begin{tabular}{rrrrrrl}
+\toprule
+$m$ & $m \bmod 3$ & $m \bmod 4$ & $m \bmod 7$ & $m \bmod 11$
+  & $m \bmod 19$ & Status \\
+\midrule
+$19\,620$ & 0 & 0 & 6 & 7 & 12 & Resolved ($1.15 \times 10^{12}$) \\
+$19\,623$ & 0 & \textbf{3} & 2 & 10 & 15 & Open ($> 10^{13}$) \\
+$19\,624$ & 1 & 0 & 3 & \textbf{0} & 16 & Open ($> 10^{13}$) \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Notable features:
+\begin{itemize}
+\item $m = 19\,623 \equiv 3 \pmod{4}$: for candidate
+  $n \equiv 2 \pmod{4}$, $s = m + n \equiv 1 \pmod{4}$
+  (favourable); but for $n \equiv 1 \pmod{4}$,
+  $s \equiv 0 \pmod{4}$ (blocked by condition~(a)).
+  This creates a more restrictive sieve pattern than for the other
+  two values.
+\item $11 \mid 19\,624$: since $11 \equiv 3 \pmod{4}$ and
+  $11 \nmid \pi(19\,624) = 2225$, any $s$ with $\vq{11}(s)$ odd
+  is blocked.  The constraint $11 \mid m$ forces
+  $s = m + n \equiv n \pmod{11}$, creating a periodic pattern
+  that may interact unfavourably with the other obstructions.
+\end{itemize}
+
+The precise mechanism by which these congruence patterns produce an
+extra factor of $>8.7$ in resistance relative to $m = 19\,620$
+remains unexplained, and we propose it as an open problem
+(see Section~\ref{sec:conclusions}).
+
+%=======================================================================
+\section{Conclusions and Open Problems}
+\label{sec:conclusions}
+%=======================================================================
+
+We have determined $a(m)$ for $99\,998$ of the first $100\,000$
+positive integers, with final search bound $n \le 10^{13}$,
+providing, to the best of our knowledge, the first large-scale
+computational verification of Sun's Conjecture~4.3(i).
+The dataset reveals a heavy-tailed distribution
+well described by a log-exponential model, with record values
+reaching $a(83\,115) = 4\,629\,736\,117\,663$ and
+Cram\'er-type ratios up to $6.47 \times 10^7$.
+
+The progressive resolution of the exceptional cases --- from $65$
+unresolved at bound $6 \times 10^9$, to $29$ at $10^{10}$, to~$9$
+at $10^{11}$, to~$5$ at $10^{12}$, and finally to~$2$ at
+$10^{13}$ --- strongly supports the conjecture: the pattern is
+consistent with a heavy-tailed distribution where
+every case is eventually resolved at a sufficiently high bound,
+rather than with the existence of structural counterexamples.
+
+We conclude with three open problems.
+
+\begin{openproblem}\label{op:unresolved}
+Determine $a(19\,623)$ and $a(19\,624)$.  Both satisfy
+$a(m) > 10^{13}$, with $a(m)/m > 5.096 \times 10^8$.
+The heuristic model suggests a median around
+$1.4 \times 10^{14}$, with approximately~$70\%$ probability
+of resolution within $n \le 10^{15}$.
+An Ext-6 campaign ($10^{13} \to 10^{14}$) would require
+$\sim 240$~hours on our hardware; algorithmic improvements
+(e.g., bitset sieve with $4\times$ segment width,
+extended filter with $q < 200$) might reduce this to
+$\sim 35$--$40$~hours.
+\end{openproblem}
+
+\begin{openproblem}\label{op:cluster}
+Explain the anomalous resistance of $m = 19\,623$ and
+$m = 19\,624$ relative to $m = 19\,620$, all sharing
+$\pi(m) = 2225$.  The resolved case $a(19\,620) \approx
+1.15 \times 10^{12}$ is already extreme, yet the unresolved
+cases exceed it by a factor of at least~$8.7$.
+Is there an arithmetic characterisation of the congruence
+conditions on~$m$ (beyond the factorisation of~$\pi(m)$) that
+predicts this extra resistance?
+\end{openproblem}
+
+\begin{openproblem}\label{op:model}
+Develop a refined probabilistic model for $a(m)$ that
+accounts for the dependence on the factorisation of~$\pi(m)$.
+The current log-exponential model treats all unresolved cases
+uniformly; a model incorporating the obstruction rate
+(which depends on the prime factorisation of~$\pi(m)$ and the
+congruence class of~$m$) would provide sharper predictions.
+\end{openproblem}
+
+%=======================================================================
+\section*{Data Availability}
+%=======================================================================
+
+The complete dataset ($99\,998$ resolved values and the
+$2$~unresolved $m$-values), the C~source code for the monolithic
+search (\texttt{sun\_A248044\_v5.c}) and the segmented targeted
+search (\texttt{sun\_A248044\_targeted\_v3.c}), the full CSV
+outputs for all campaigns, the machine-readable verification
+logs, and a Python verification script (\texttt{verify\_A248044.py})
+that checks the divisibility condition
+$(m+a(m)) \mid \pi(m)^2 + \pi(a(m))^2$ for any supplied list
+of $(m, a(m))$ pairs are publicly available at:
+\begin{itemize}
+\item GitHub repository:
+      \url{https://github.com/carcorti/A248044}
+\item Permanent Zenodo archive:
+      \url{https://doi.org/10.5281/zenodo.19182594}
+\end{itemize}
+An extended a-file for OEIS A248044 has been submitted.
+
+%=======================================================================
+\section*{Acknowledgements}
+%=======================================================================
+
+The author thanks Zhi-Wei Sun for the beautiful conjecture that
+motivated this work.
+The use of AI tools in the development of this work is disclosed
+in the opening footnote.
+
+%=======================================================================
+\bibliographystyle{amsplain}
+\begin{thebibliography}{99}
+
+\bibitem{Sun2019}
+Zhi-Wei Sun,
+\textit{Some new problems in additive combinatorics},
+Nanjing Univ.\ J.\ Math.\ Biquarterly \textbf{36} (2019), no.~2,
+134--155; preprint: arXiv:1309.1679 [math.NT] (submitted 2013,
+v9: 2020).
+Conjecture~4.3(i) appears on p.~15.
+\url{https://arxiv.org/abs/1309.1679}
+
+\bibitem{CortiA247975}
+C.~Corti,
+\textit{Exceptional cases and statistical structure of sequence
+A247975: a computational study of Sun's Conjecture~4.1(i)},
+preprint, 2025; data and code: Zenodo
+\url{https://doi.org/10.5281/zenodo.18920371};
+OEIS b-file extension published March~2026,
+\url{https://oeis.org/A247975}.
+
+\bibitem{OEIS_A248044}
+OEIS Foundation,
+\textit{Sequence A248044},
+The On-Line Encyclopedia of Integer Sequences
+(accessed March~2026).
+\url{https://oeis.org/A248044}
+
+\bibitem{OEIS_A006880}
+OEIS Foundation,
+\textit{Sequence A006880} ($\pi(10^n)$),
+The On-Line Encyclopedia of Integer Sequences
+(accessed March~2026).
+\url{https://oeis.org/A006880}
+
+\bibitem{IrelandRosen}
+K.~Ireland and M.~Rosen,
+\textit{A Classical Introduction to Modern Number Theory},
+2nd~ed., Springer, New York, 1990.
+
+\bibitem{CrandallPomerance}
+R.~Crandall and C.~Pomerance,
+\textit{Prime Numbers: A Computational Perspective},
+2nd~ed., Springer, New York, 2005.
+
+\bibitem{Cramer1936}
+H.~Cram\'er,
+\textit{On the order of magnitude of the difference between
+consecutive prime numbers},
+Acta Arith.\ \textbf{2} (1936), 23--46.
+
+\bibitem{Granville1995}
+A.~Granville,
+\textit{Harald Cram\'er and the distribution of prime numbers},
+Scand.\ Actuarial J.\ (1995), no.~1, 12--28.
+
+\bibitem{Landau1908}
+E.~Landau,
+\textit{\"Uber die Einteilung der positiven ganzen Zahlen in vier
+Klassen nach der Mindestzahl der zu ihrer additiven Zusammensetzung
+erforderlichen Quadrate},
+Arch.\ Math.\ Phys.\ \textbf{13} (1908), 305--312.
+
+\bibitem{Mertens1874}
+F.~Mertens,
+\textit{Ein Beitrag zur analytischen Zahlentheorie},
+J.\ Reine Angew.\ Math.\ \textbf{78} (1874), 46--62.
+
+\bibitem{Tenenbaum1995}
+G.~Tenenbaum,
+\textit{Introduction to Analytic and Probabilistic Number Theory},
+Cambridge Univ.\ Press, 1995.
+
+\bibitem{Hill1975}
+B.~M.~Hill,
+\textit{A simple general approach to inference about the tail of a
+distribution},
+Ann.\ Statist.\ \textbf{3} (1975), 1163--1174.
+
+\bibitem{SymPy}
+A.~Meurer et al.,
+\textit{SymPy: symbolic computing in Python},
+PeerJ Computer Science \textbf{3} (2017), e103.
+
+\bibitem{OpenMP}
+OpenMP Architecture Review Board,
+\textit{OpenMP Application Programming Interface}, Version~5.2, 2021.
+\url{https://www.openmp.org/specifications/}
+
+\bibitem{MacTsop2021}
+A.~Machiavelo and A.~Tsopanidis,
+\textit{Zhi-Wei Sun's 1-3-5 conjecture and variations},
+J.\ Number Theory \textbf{222} (2021), 135--155.
+
+\end{thebibliography}
+
+\end{document}
+%-----------------------------------------------------------------------
+% For final submission to MCOM:
+%   Change \documentclass{amsart}
+%       to \documentclass{mcom-l}
+%   and copy mcom-l.cls into the project folder.
+%-----------------------------------------------------------------------

@@ -42,7 +42,8 @@ is [OEIS A248044](https://oeis.org/A248044).
 A248044/
 ├── README.md
 ├── paper/
-│   └── A248044_rev5.tex          # LaTeX source of the paper (amsart class)
+│   ├── A248044_rev5.tex          # LaTeX source of the paper (amsart class, first version)
+│   └── A248044_rev6.tex          # LaTeX source of the paper (amsart class,current version)
 ├── src/
 │   ├── sun_A248044_v5.c          # Monolithic search (campaigns M1 and Ext-1)
 │   └── sun_A248044_targeted_v3.c # Segmented targeted search (campaigns Ext-2..5)
