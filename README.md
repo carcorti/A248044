@@ -1,15 +1,16 @@
 # A248044 — Computational Verification of Sun's Conjecture 4.3(i)
 
-This repository contains the source code, data, and verification tools
-accompanying the paper:
+**Repository for the paper:**  
+*Computational Verification of Sun's Conjecture 4.3(i)  
+and Exceptional Structure of Sequence A248044*  
+Carlo Corti — manuscript in preparation, 2026.
 
-> Carlo Corti, *Computational Verification of Sun's Conjecture 4.3(i)
-> and Exceptional Structure of Sequence A248044*,
-> preprint, 2026.
+> **Zenodo DOI:** [10.5281/zenodo.19182594](https://doi.org/10.5281/zenodo.19182594)  
+> **OEIS sequence:** [A248044](https://oeis.org/A248044)
 
 ---
 
-## The conjecture
+## The Conjecture
 
 Zhi-Wei Sun (2013/2019) conjectured that for every positive integer *m*,
 there exists a positive integer *n* such that
@@ -23,7 +24,7 @@ is [OEIS A248044](https://oeis.org/A248044).
 
 ---
 
-## Main results
+## Main Results
 
 | Metric | Value |
 |--------|-------|
@@ -36,35 +37,36 @@ is [OEIS A248044](https://oeis.org/A248044).
 
 ---
 
-## Repository structure
+## Repository Structure
 
 ```
 A248044/
 ├── README.md
 ├── paper/
-│   ├── A248044_rev5.tex          # LaTeX source of the paper (amsart class, first version)
-│   └── A248044_rev6.tex          # LaTeX source of the paper (amsart class,current version)
+│   ├── A248044.tex                          # LaTeX source — final version (sn-jnl class)
+│   └── A248044.pdf                          # Compiled PDF of the manuscript
 ├── src/
-│   ├── sun_A248044_v5.c          # Monolithic search (campaigns M1 and Ext-1)
-│   └── sun_A248044_targeted_v3.c # Segmented targeted search (campaigns Ext-2..5)
+│   ├── sun_A248044_v5.c                     # Monolithic search (campaigns M1 and Ext-1)
+│   └── sun_A248044_targeted_v3.c            # Segmented targeted search (Ext-2..5)
 ├── data/
-│   ├── out_A248044_m100000.csv   # Results of campaign M1 (bound n ≤ 10⁹)
-│   ├── out_ext2.csv              # 36 cases resolved in Ext-2
-│   ├── out_ext3.csv              # 20 cases resolved in Ext-3
-│   ├── out_ext4.csv              #  4 cases resolved in Ext-4
-│   ├── out_ext5.csv              #  3 cases resolved in Ext-5
-│   └── a248044.txt               # OEIS a-file: all 100 000 entries (? for gaps)
+│   ├── out_A248044_m100000.csv              # Results of campaign M1 (bound n ≤ 10⁹)
+│   ├── out_ext2.csv                         # 36 cases resolved in Ext-2
+│   ├── out_ext3.csv                         # 20 cases resolved in Ext-3
+│   ├── out_ext4.csv                         #  4 cases resolved in Ext-4
+│   ├── out_ext5.csv                         #  3 cases resolved in Ext-5
+│   └── a248044.txt                          # OEIS a-file: all 100 000 entries (? for gaps)
 ├── logs/
-│   ├── log_m100000.txt           # Full log of campaign M1 (bound n ≤ 10⁹)
-│   ├── log_ext1.txt              # Log of Ext-1 (monolithic, bound n ≤ 6 × 10⁹)
-│   ├── log_ext2.txt              # Summary log of Ext-2
-│   ├── log_ext3.txt              # Summary log of Ext-3
-│   ├── log_ext4.txt              # Summary log of Ext-4
-│   └── log_ext5.txt              # Summary log of Ext-5
+│   ├── log_m100000.txt                      # Full log of campaign M1 (bound n ≤ 10⁹)
+│   ├── log_ext1.txt                         # Log of Ext-1 (monolithic, bound n ≤ 6 × 10⁹)
+│   ├── log_ext2.txt                         # Summary log of Ext-2
+│   ├── log_ext3.txt                         # Summary log of Ext-3
+│   ├── log_ext4.txt                         # Summary log of Ext-4
+│   └── log_ext5.txt                         # Summary log of Ext-5
 ├── figures/
-│   └── a248044.png               # Logarithmic scatterplot of A248044(n), n = 1..100000
+│   └── a248044.png                          # Logarithmic scatterplot of A248044(n), n = 1..100000
 └── verification/
-    └── verify_A248044.py         # Python verification script
+    ├── verify_A248044.py                    # Python verification script
+    └── primecount_verification_A248044.md   # Independent π(a(m)) recomputation log
 ```
 
 **Notes on data files:**
@@ -77,13 +79,16 @@ A248044/
   65 cases still open after Ext-1; they resolve 63 of those 65.
 - `a248044.txt` is the authoritative OEIS a-file consolidating all campaigns,
   with `?` at *m* = 19 623 and *m* = 19 624 (lower bound *a*(*m*) > 10¹³).
+- `verification/primecount_verification_A248044.md` documents the independent recomputation of
+  π(*a*(*m*)) for all 63 extended-campaign witnesses using `primecount` 7.10
+  (Deleglise–Rivat algorithm); all values match the CSV output exactly.
 - The OEIS b-file for A248044 (terms *n* = 1..10 000, authored by Chai Wah Wu)
   is not reproduced here as it is not our work; it is available at
   https://oeis.org/A248044/b248044.txt.
 
 ---
 
-## Computational campaigns
+## Computational Campaigns
 
 | Campaign | Tool | Search range | Newly resolved | Still open | Wall time |
 |----------|------|-------------|----------------|------------|-----------|
@@ -99,11 +104,11 @@ Compiler: GCC 13.2.0, flags `-O3 -march=znver4 -fopenmp`.
 
 ---
 
-## Building and running the C programs
+## Building and Running
 
 Both programs require GCC with OpenMP support.
 
-### Monolithic search (campaign M1)
+### Monolithic search — `sun_A248044_v5.c`
 
 ```bash
 gcc -O3 -march=native -fopenmp -o sun_A248044_v5 src/sun_A248044_v5.c
@@ -114,7 +119,7 @@ gcc -O3 -march=native -fopenmp -o sun_A248044_v5 src/sun_A248044_v5.c
 > for the global π-table (*N*_max = 6 × 10⁹). Ensure sufficient memory
 > before running.
 
-### Targeted segmented search (campaigns Ext-2..5)
+### Targeted segmented search — `sun_A248044_targeted_v3.c`
 
 ```bash
 gcc -O3 -march=native -fopenmp -o sun_A248044_targeted src/sun_A248044_targeted_v3.c
@@ -133,7 +138,7 @@ standard output in CSV format.
 
 ---
 
-## Verifying the results
+## Verifying the Results
 
 The script `verification/verify_A248044.py` checks the divisibility
 condition (*m* + *a*(*m*)) | π(*m*)² + π(*a*(*m*))² for every resolved
@@ -174,9 +179,14 @@ Result: ALL ENTRIES PASS — divisibility condition verified.
 
 Python 3.10 or later required; no external dependencies.
 
+Independent recomputation of π(*a*(*m*)) for all 63 extended-campaign
+witnesses was performed using [`primecount`](https://github.com/kimwalisch/primecount)
+7.10 (Deleglise–Rivat algorithm); results are logged in
+`verification/primecount_verification_A248044.md`.
+
 ---
 
-## CSV format
+## CSV Format
 
 All campaign CSV files share the same column structure:
 
@@ -192,7 +202,9 @@ All campaign CSV files share the same column structure:
 
 Lines beginning with `#` are comments.
 
-## OEIS a-file format
+---
+
+## OEIS a-file Format
 
 `a248044.txt` follows the standard OEIS format: one entry per line as `n a(n)`,
 with `?` for the two unknown values:
@@ -208,10 +220,9 @@ with `?` for the two unknown values:
 
 ---
 
-## π checkpoints (OEIS A006880)
+## π Checkpoints (OEIS A006880)
 
-These values are used by the verification script and appear in Table 5
-of the paper.
+These values are used by the verification script and appear in Table 5 of the paper.
 
 | *n* | π(*n*) |
 |-----|--------|
@@ -225,47 +236,60 @@ of the paper.
 
 ---
 
-## Companion sequence
+## Open Problems
+
+The following 2 values of *m* ≤ 100 000 have no solution within the search bound *n* ≤ 10¹³:
+
+| *m* | π(*m*) | *a*(*m*)/*m* > | Heuristic median |
+|---:|---:|---:|---:|
+| 19 623 | 2 225 | 5.095 × 10⁸ | ~5.7 × 10¹³ |
+| 19 624 | 2 225 | 5.095 × 10⁸ | ~5.7 × 10¹³ |
+
+Both share π(*m*) = 2225 = 5² × 89, whose prime factorisation consists entirely of
+primes ≡ 1 (mod 4), causing the obstruction filter to operate at full scope.
+The heuristic model gives ~84% probability of resolution within *n* ≤ 10¹⁵.
+
+For each of these, find the least positive integer *n* such that (*m* + *n*) | π(*m*)² + π(*n*)², or prove that none exists.
+
+---
+
+## Companion Sequence
 
 The companion sequence [OEIS A247975](https://oeis.org/A247975) encodes
-Sun's Conjecture 4.1(i), which replaces π(*m*) with *p*_*m* (the *m*-th
-prime). Its computational study is available at:
+Sun's Conjecture 4.1(i), which replaces π(*m*) with *p*_*m* (the *m*-th prime).
+Its computational study is available at:
 [github.com/carcorti/A247975](https://github.com/carcorti/A247975).
-
----
-
-## Permanent archive
-
-A permanent Zenodo archive with DOI will be linked here upon submission
-of the paper.
-
----
-
-## License
-
-The source code (`src/`) and verification script (`verification/`) are
-released under the [MIT License](https://opensource.org/licenses/MIT).  
-The dataset (`data/`, `logs/`) is released under
-[CC0 1.0 Universal](https://creativecommons.org/publicdomain/zero/1.0/).  
-The paper source (`paper/`) is © Carlo Corti, all rights reserved
-pending journal publication.
 
 ---
 
 ## Citation
 
-If you use this code or data, please cite the paper:
+If you use this code or data, please cite:
 
 ```
-@article{Corti2026A248044,
-  author  = {Carlo Corti},
-  title   = {Computational Verification of {Sun}'s Conjecture~4.3(i)
-             and Exceptional Structure of Sequence~{A248044}},
-  journal = {Mathematics of Computation},
-  year    = {2026},
-  note    = {Preprint available at \url{https://github.com/carcorti/A248044}}
-}
+Carlo Corti,
+"Computational Verification of Sun's Conjecture 4.3(i)
+ and Exceptional Structure of Sequence A248044",
+manuscript in preparation, 2026.
+Zenodo DOI: 10.5281/zenodo.19182594
 ```
+
+---
+
+## License
+
+The source code (`src/`) and verification script (`verification/`) are released under
+the [MIT License](https://opensource.org/licenses/MIT).  
+The dataset (`data/`, `logs/`) is released under
+[CC0 1.0 Universal](https://creativecommons.org/publicdomain/zero/1.0/).  
+The paper source (`paper/`) is © Carlo Corti, all rights reserved pending publication.
+
+---
+
+## Acknowledgements
+
+The author thanks Zhi-Wei Sun for the beautiful conjecture that motivated this work.  
+Computational assistance: Anthropic's Claude language models (`claude-sonnet-4-6`, `claude-opus-4-6`).
 
 ---
 
