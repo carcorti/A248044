@@ -1,0 +1,48 @@
+cff-version: 1.2.0
+message: "If you use this code, data, or paper, please cite this repository and its Zenodo archive."
+title: "Computational Verification of Sun's Conjecture 4.3(i): Exceptional Structure of OEIS Sequence A248044"
+type: software
+authors:
+  - family-names: Corti
+    given-names: Carlo
+    email: carlo.corti@outlook.com
+    affiliation: Independent researcher
+repository-code: "https://github.com/carcorti/A248044"
+url: "https://github.com/carcorti/A248044"
+doi: "10.5281/zenodo.19182594"
+version: "v1.0.1"
+date-released: "2026-06-09"
+license: MIT
+abstract: >-
+  Code, data, selected campaign and validation logs, and paper supporting a
+  large-scale computational investigation of OEIS A248044, associated with
+  Sun's Conjecture 4.3(i). The computation determines a(m) for 99,998 of the
+  first 100,000 positive integers, with final search bound n <= 10^13, leaving
+  m = 19623 and m = 19624 unresolved with lower bound a(m) > 10^13.
+keywords:
+  - OEIS A248044
+  - Sun's Conjecture 4.3(i)
+  - prime-counting function
+  - computational number theory
+  - segmented sieve
+  - OpenMP
+references:
+  - type: article
+    authors:
+      - family-names: Sun
+        given-names: Zhi-Wei
+    title: "Some new problems in additive combinatorics"
+    journal: "Nanjing University Journal of Mathematical Biquarterly"
+    year: 2019
+    volume: 36
+    issue: 2
+    start: 134
+    end: 155
+  - type: software
+    authors:
+      - family-names: Corti
+        given-names: Carlo
+    title: "A248044: computational verification of Sun's Conjecture 4.3(i)"
+    doi: "10.5281/zenodo.19182594"
+    url: "https://github.com/carcorti/A248044"
+    year: 2026

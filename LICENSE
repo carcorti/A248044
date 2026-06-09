@@ -1,11 +1,3 @@
-This repository contains materials under two separate licenses,
-depending on the type of content.
-
--------------------------------------------------------------------------------
-SOURCE CODE AND VERIFICATION SCRIPTS
-(files in src/ and verification/)
--------------------------------------------------------------------------------
-
 MIT License
 
 Copyright (c) 2026 Carlo Corti
@@ -27,28 +19,3 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-
--------------------------------------------------------------------------------
-DATASET AND LOGS
-(files in data/ and logs/)
--------------------------------------------------------------------------------
-
-CC0 1.0 Universal — Public Domain Dedication
-
-To the extent possible under law, Carlo Corti has waived all copyright and
-related or neighboring rights to the dataset and log files in this repository.
-This work is published from Poland.
-
-Full legal text: https://creativecommons.org/publicdomain/zero/1.0/
-
--------------------------------------------------------------------------------
-PAPER SOURCE
-(files in paper/)
--------------------------------------------------------------------------------
-
-Copyright (c) 2026 Carlo Corti. All rights reserved.
-
-The LaTeX source of the paper is provided for transparency and reproducibility.
-It may not be reproduced, distributed, or used to create derivative works
-without the explicit written permission of the author, except as permitted
-by the applicable journal's policies after publication.

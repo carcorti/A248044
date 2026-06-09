@@ -1,25 +1,29 @@
+\documentclass[11pt]{article}
 
-\documentclass[pdflatex,sn-mathphys-num,Numbered]{sn-jnl}
-
-\usepackage{amsmath,amssymb,amsfonts}
-\usepackage{amsthm}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath,amssymb,amsthm}
 \usepackage{booktabs}
+\usepackage{float}
+\usepackage{geometry}
+\usepackage{hyperref}
 \usepackage{url}
 
-\theoremstyle{thmstyleone}
-\newtheorem{theorem}{Theorem}[section]
-\newtheorem{lemma}[theorem]{Lemma}
-\newtheorem{corollary}[theorem]{Corollary}
-\newtheorem{proposition}[theorem]{Proposition}
-\newtheorem{conjecture}[theorem]{Conjecture}
-\newtheorem{openproblem}[theorem]{Open Problem}
+\geometry{margin=1in}
+\emergencystretch=3em
 
-\theoremstyle{thmstylethree}
-\newtheorem{definition}[theorem]{Definition}
-
-\theoremstyle{thmstyletwo}
-\newtheorem{example}[theorem]{Example}
-\newtheorem{remark}[theorem]{Remark}
+\newtheorem{theorem}{Theorem}
+\newtheorem{computationalresult}{Computational Result}
+\newtheorem{proposition}{Proposition}
+\newtheorem{lemma}{Lemma}
+\newtheorem{corollary}{Corollary}
+\newtheorem{conjecture}{Conjecture}
+\newtheorem{openproblem}{Open Problem}
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}
+\newtheorem{example}{Example}
+\theoremstyle{remark}
+\newtheorem{remark}{Remark}
 
 \numberwithin{equation}{section}
 
@@ -27,23 +31,19 @@
 \newcommand{\Zp}{\mathbb{Z}^{+}}
 \newcommand{\vq}[1]{v_{#1}}
 
-\let\eqnarray\relax
-\let\endeqnarray\relax
+\title{Computational Verification of Sun's Conjecture~4.3(i):\\
+Exceptional Structure of OEIS Sequence~A248044}
+\author{Carlo Corti\\
+Independent researcher\\
+\texttt{carlo.corti@outlook.com}}
+\date{March 2026}
 
 \begin{document}
 
-\title[Computational Verification of Sun's Conjecture~4.3(i)]
-{Computational Verification of Sun's Conjecture~4.3(i)
-and Exceptional Structure of Sequence~A248044}
+\maketitle
 
-\author*[1]{\fnm{Carlo} \sur{Corti}}\email{carlo.corti@outlook.com}
-
-\affil*[1]{\orgname{Independent researcher},
-  \orgaddress{\postcode{21-040}, \city{Kalin\'owka}, \country{Poland}}}
-
-\pacs[MSC Classification]{11A41, 11Y55, 11N05, 11A07}
-
-\abstract{We present the first large-scale computational investigation of
+\begin{abstract}
+We present the first large-scale computational investigation of
 OEIS (On-Line Encyclopedia of Integer Sequences) sequence A248044,
 which encodes Sun's Conjecture~4.3(i):
 for every positive integer $m$, there exists a positive integer~$n$
@@ -67,13 +67,16 @@ entirely of primes congruent to $1 \pmod{4}$, so that the
 implemented obstruction filter operates at full scope.
 Statistical analysis reveals a heavy-tailed distribution
 consistent with a log-exponential model, and we provide
-probabilistic estimates for the unresolved values.}
+probabilistic estimates for the unresolved values.
+\end{abstract}
 
-\keywords{Prime counting function, Sum of two squares,
+\noindent\textbf{2020 Mathematics Subject Classification.}
+Primary 11A41; Secondary 11Y55, 11N05, 11A07.
+
+\noindent\textbf{Key words and phrases.}
+prime counting function, Sum of two squares,
 Computational verification, OEIS A248044, Sun's conjecture,
-Obstruction filter}
-
-\maketitle
+Obstruction filter.
 
 \section{Introduction}
 \label{sec:intro}
@@ -329,7 +332,7 @@ AMD Ryzen~9 7940HS (16 threads), 64\,GB DDR5 RAM,
 running Linux Mint~22.3.  Compilation used GCC with
 \texttt{-O3 -march=znver4 -fopenmp}.
 
-\subsection{Monolithic search: \texttt{sun\_A248044\_v5.c}}
+\subsection[Monolithic search: sun-A248044-v5.c]{Monolithic search: \texttt{sun\_A248044\_v5.c}}
 
 For the initial phase, the program builds a global table of
 $\pi(n)$ for all $n \le N_{\max}$, stored as \texttt{uint32\_t}.
@@ -363,7 +366,7 @@ The monolithic phase resolved $99\,935$ of $100\,000$ cases in
 approximately $10$~minutes of wall-clock time, leaving $65$
 unresolved cases (the ``exceptional'' values of~$m$).
 
-\subsection{Targeted segmented search: \texttt{sun\_A248044\_targeted\_v3.c}}
+\subsection[Targeted segmented search: sun-A248044-targeted-v3.c]{Targeted segmented search: \texttt{sun\_A248044\_targeted\_v3.c}}
 \label{sec:targeted}
 
 The monolithic architecture cannot scale beyond
@@ -454,21 +457,6 @@ CSV output column).
 All observations and their dispositions are documented in the source
 code header.
 
-\subsection{Use of AI tools}
-\label{sec:ai-disclosure}
-
-The computational implementation, including the C~search programs
-and segmented sieve, was developed with extensive assistance
-from Anthropic's Claude language models
-(\texttt{claude-sonnet-4-6} and \texttt{claude-opus-4-6}).
-Claude generated substantial drafts of the algorithmic and
-statistical sections, performed two independent code reviews
-of the targeted search program, and assisted in the statistical
-analysis.
-All final text and numerical results were verified and approved by
-the author, who bears full scientific responsibility for all results,
-including those portions where AI assistance was used.
-
 \section{Computational Results}
 \label{sec:results}
 
@@ -480,7 +468,7 @@ extended campaigns.
 
 \begin{table}[ht]
 \centering
-\caption{Campaign summary.  The monolithic run (M1) used
+\caption[Campaign summary]{Campaign summary.  The monolithic run (M1) used
 \texttt{sun\_A248044\_v5.c}; all Ext runs used
 \texttt{sun\_A248044\_targeted\_v3.c}.
 ``+Resolved'' denotes newly resolved cases in each run.}
@@ -831,12 +819,12 @@ Conjecture~\textup{\ref{conj:sun43i}} fails for this value of~$m$.
 
 \begin{proof}
 The full range $1 \le n \le 10^{13}$ was covered in two phases.
-The monolithic program \texttt{sun\_A248044\_v5.c}
+The monolithic program \path{sun_A248044_v5.c}
 (Section~\ref{sec:algorithm}) tested every $n$ in the range
 $1 \le n \le 6 \times 10^9$ for all $m \le 100\,000$,
 finding no solution for the two values in~\eqref{eq:open}.
 The targeted segmented program
-\texttt{sun\_A248044\_targeted\_v3.c}
+\path{sun_A248044_targeted_v3.c}
 (Section~\ref{sec:targeted}) then extended the search over
 the intervals $6 \times 10^9 < n \le 10^{13}$ via the
 campaigns Ext-2 through Ext-5 (Table~\ref{tab:campaigns}),
@@ -1013,53 +1001,48 @@ uniformly; a model incorporating the obstruction rate
 congruence class of~$m$) would provide sharper predictions.
 \end{openproblem}
 
-\backmatter
-
-\bmhead{Acknowledgements}
+\section*{Acknowledgements}
 
 The author thanks Zhi-Wei Sun for the beautiful conjecture that
 motivated this work.
-The use of AI tools in the development of this work is disclosed
-in Section~\ref{sec:ai-disclosure}.
 
-\section*{Declarations}
+\section*{Data availability}
+\label{sec:data}
 
-\begin{description}
-\item[Funding] No funding was received for conducting this study.
+The complete dataset ($99\,998$ resolved values and the
+$2$~unresolved $m$-values), the full CSV outputs for all
+campaigns, and machine-readable verification logs are publicly
+available at the GitHub repository
+\url{https://github.com/carcorti/A248044}, the permanent Zenodo archive
+\url{https://doi.org/10.5281/zenodo.19182594}, and the OEIS entry
+\url{https://oeis.org/A248044}.
 
-\item[Competing interests] The author has no relevant financial
-  or non-financial interests to disclose.
+The C~source code for the monolithic search
+(\path{sun_A248044_v5.c}), the segmented targeted search
+(\path{sun_A248044_targeted_v3.c}), and a Python verification script
+(\path{verify_A248044.py}) that checks the divisibility condition
+$(m+a(m)) \mid \pi(m)^2 + \pi(a(m))^2$ for any supplied list
+of $(m, a(m))$ pairs are available at the GitHub and Zenodo
+repositories listed above.
 
-\item[Data availability] \label{sec:data}
-  The complete dataset ($99\,998$ resolved values and the
-  $2$~unresolved $m$-values), the full CSV outputs for all
-  campaigns, and machine-readable verification logs are publicly
-  available at:
-  \begin{itemize}
-    \item GitHub repository:
-          \url{https://github.com/carcorti/A248044}
-    \item Permanent Zenodo archive (DOI):
-          \url{https://doi.org/10.5281/zenodo.19182594}
-    \item OEIS: \url{https://oeis.org/A248044}
-  \end{itemize}
+\section*{AI use disclosure}
+\label{sec:ai-disclosure}
 
-\item[Code availability]
-  The C~source code for the monolithic search
-  (\texttt{sun\_A248044\_v5.c}), the segmented targeted search
-  (\texttt{sun\_A248044\_targeted\_v3.c}), and a Python
-  verification script (\texttt{verify\_A248044.py}) that checks
-  the divisibility condition
-  $(m+a(m)) \mid \pi(m)^2 + \pi(a(m))^2$ for any supplied list
-  of $(m, a(m))$ pairs are available at the GitHub and Zenodo
-  repositories listed above.
-
-\item[Author contribution] Not applicable (single author).
-
-\item[AI assistance]
-The author used Claude (Anthropic) as an AI assistant during the preparation of this manuscript. The AI assisted with code review, verification of computational results, and editorial drafting of the manuscript. All scientific content, mathematical proofs, computational results, and final decisions regarding the text are the sole responsibility of the author.
-\end{description}
+The computational implementation, including the C~search programs
+and segmented sieve, was developed with extensive assistance
+from Anthropic's Claude language models
+(\texttt{claude-sonnet-4-6} and \texttt{claude-opus-4-6}).
+Claude generated substantial drafts of the algorithmic and
+statistical sections, performed two independent code reviews
+of the targeted search program, and assisted in the statistical
+analysis.
+All final text and numerical results were verified and approved by
+the author, who bears full scientific responsibility for all results,
+including those portions where AI assistance was used.
 
 \begin{thebibliography}{99}
+\sloppy
+\raggedright
 
 \bibitem{Sun2019}
 Sun, Z.-W.:

@@ -1,0 +1,54 @@
+# Build products
+*.o
+*.out
+*.exe
+*.dll
+*.so
+*.dylib
+sun_A248044_v5
+sun_A248044_targeted
+
+# LaTeX auxiliary files
+*.aux
+*.bbl
+*.bcf
+*.blg
+*.fdb_latexmk
+*.fls
+*.log
+*.out
+*.run.xml
+*.synctex.gz
+*.toc
+
+# Python caches
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Editor and OS files
+.DS_Store
+Thumbs.db
+*~
+*.swp
+*.swo
+.vscode/
+.idea/
+
+# Temporary data and local scratch files
+tmp/
+temp/
+scratch/
+*.tmp
+*.bak
+*.orig
+
+# Large local-only generated artifacts
+*.checkpoint
+*.ckpt
+core
+core.*
+
+# Keep repository data, logs, figures, paper PDF, and source files tracked intentionally.
